@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CarAuction.Api/CarAuction.Api.csproj" />
+    <Project Path="src/CarAuction.Application/CarAuction.Application.csproj" />
+    <Project Path="src/CarAuction.Domain/CarAuction.Domain.csproj" />
+    <Project Path="src/CarAuction.Infrastructure/CarAuction.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CarAuction.Tests/CarAuction.Tests.csproj" />
+  </Folder>
+</Solution>
