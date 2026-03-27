@@ -37,7 +37,7 @@ namespace CarAuction.Application.Services
         public async Task<AuctionDTO> CreateAuctionAsync(CreateAuctionRequest request, CancellationToken cancellationToken = default)
         {
             var vehicle = await _vehicleRepository.GetByIdAsync(request.VehicleId, cancellationToken)
-                ?? throw new VehicleNotFoundException();
+                ?? throw new VehicleNotFoundException(request.VehicleId);
 
             await _createAuctionLock.WaitAsync(cancellationToken);
             try

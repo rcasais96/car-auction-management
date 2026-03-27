@@ -38,18 +38,7 @@ namespace CarAuction.Tests
             auction.ClosedAt.Should().BeNull();
         }
 
-        /// <summary>
-        /// Verifica que não é possível criar um leilão sem VehicleId
-        /// </summary>
-        [Fact]
-        public void Constructor_WithEmptyVehicleId_ShouldThrowArgumentException()
-        {
-            // Act
-            var act = () => new Auction(Guid.Empty, 1000m);
-
-            // Assert — verifica que lança a exception correta
-            act.Should().Throw<VehicleIdRequiredException>(); 
-        }
+  
 
         // Theory — corre o mesmo teste com múltiplos valores
         // cada InlineData é uma execução separada

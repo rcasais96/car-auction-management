@@ -25,7 +25,7 @@ namespace CarAuction.Domain.Entities
         public Auction(Guid vehicleId, decimal startingBid)
         {
             if (vehicleId == Guid.Empty)
-                throw new VehicleIdRequiredException();
+                throw new ArgumentException("VehicleId is required", nameof(vehicleId));
 
             if (startingBid <= 0)
                 throw new ArgumentOutOfRangeException(nameof(startingBid),

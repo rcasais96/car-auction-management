@@ -22,7 +22,7 @@ namespace CarAuction.Application.Services
         public async Task<VehicleDTO> GetByIdAsync(Guid vehicleId, CancellationToken cancellationToken = default)
         {
             var vehicle = await _vehicleRepository.GetByIdAsync(vehicleId, cancellationToken)
-            ?? throw new VehicleNotFoundException();
+            ?? throw new VehicleNotFoundException(vehicleId);
 
             return Mapper.MapToResponse(vehicle);
         }
