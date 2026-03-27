@@ -4,10 +4,7 @@ using CarAuction.Application.Utils;
 using CarAuction.Domain.Entities;
 using CarAuction.Domain.Exceptions;
 using CarAuction.Domain.Repositories;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CarAuction.Application.Services
 {
@@ -42,7 +39,7 @@ namespace CarAuction.Application.Services
             var vehicle = await _vehicleRepository.GetByIdAsync(request.VehicleId, cancellationToken)
                 ?? throw new VehicleNotFoundException();
 
-            await _createAuctionLock.WaitAsync(TimeSpan.FromSeconds(5),cancellationToken);
+            await _createAuctionLock.WaitAsync(cancellationToken);
             try
             {
                 if (await _auctionRepository.HasActiveAuctionAsync(request.VehicleId, cancellationToken))
@@ -71,13 +68,13 @@ namespace CarAuction.Application.Services
 
         public async Task<BidDTO> PlaceBidAsync(Guid auctionId, PlaceBidRequest model, CancellationToken cancellationToken = default)
         {
-            var auction = await _auctionRepository.GetByIdAsync(auctionId, cancellationToken)
-                ?? throw new AuctionNotFoundException(auctionId);
-
             var auctionLock = GetAuctionLock(auctionId);
-            await auctionLock.WaitAsync(TimeSpan.FromSeconds(5), cancellationToken);
+            await auctionLock.WaitAsync(cancellationToken);
             try
             {
+                var auction = await _auctionRepository.GetByIdAsync(auctionId, cancellationToken)
+                 ?? throw new AuctionNotFoundException(auctionId);
+
                 auction.PlaceBid(model.BidderId, model.Amount);
                 return Mapper.MapToResponse(auction.Bids.Last());
             }
