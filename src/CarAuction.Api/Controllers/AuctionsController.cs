@@ -47,7 +47,7 @@ namespace CarAuction.Api.Controllers
         public async Task<IActionResult> CloseAuction(Guid id, CancellationToken cancellationToken)
         {
             await _auctionService.CloseAuctionAsync(id, cancellationToken);
-            return Ok();
+            return NoContent();
         }
     }
 }

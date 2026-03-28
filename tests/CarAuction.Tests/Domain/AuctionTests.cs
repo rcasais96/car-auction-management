@@ -1,23 +1,21 @@
-﻿using CarAuction.Domain.Entities;
+﻿using System;
+using System.Linq;
+using CarAuction.Domain.Entities;
 using CarAuction.Domain.Exceptions;
 using FluentAssertions;
 
-namespace CarAuction.Tests
+namespace CarAuction.Tests.Domain
 {
     public class AuctionTests
     {
-        // ─── helpers ────────────────────────────────────────────────────────────
+        // ─── Helpers ────────────────────────────────────────────────────────────
 
-        // factory method — evita repetição na criação de auctions
-        private static Auction CreateAuction(decimal startingBid = 1000m)
-            => new(Guid.NewGuid(), startingBid);
+        private static Auction CreateAuction(decimal startingBid = 1000m, Guid? vehicleId = null)
+            => new(vehicleId ?? Guid.NewGuid(), startingBid);
 
         // ─── Constructor ────────────────────────────────────────────────────────
 
-        /// <summary>
-        /// Verifica que ao criar um Auction com dados válidos, todas as propriedades ficam com os valores corretos
-        /// </summary>
-        [Fact] // teste simples sem parâmetros
+        [Fact]
         public void Constructor_WithValidData_ShouldCreateAuction()
         {
             // Arrange
@@ -27,7 +25,7 @@ namespace CarAuction.Tests
             // Act
             var auction = new Auction(vehicleId, startingBid);
 
-            // Assert — FluentAssertions torna as asserções mais legíveis
+            // Assert
             auction.Id.Should().NotBe(Guid.Empty);
             auction.VehicleId.Should().Be(vehicleId);
             auction.StartingBid.Should().Be(startingBid);
@@ -36,24 +34,34 @@ namespace CarAuction.Tests
             auction.Bids.Should().BeEmpty();
             auction.StartedAt.Should().BeNull();
             auction.ClosedAt.Should().BeNull();
+            auction.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+            auction.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
         }
 
-  
-
-        // Theory — corre o mesmo teste com múltiplos valores
-        // cada InlineData é uma execução separada
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
         [InlineData(-100)]
-        public void Constructor_WithInvalidStartingBid_ShouldThrowArgumentOutOfRangeException(
-            decimal invalidBid)
+        [InlineData(-0.01)]
+        public void Constructor_WithInvalidStartingBid_ShouldThrowArgumentOutOfRangeException(decimal invalidBid)
         {
             // Act
             var act = () => new Auction(Guid.NewGuid(), invalidBid);
 
             // Assert
-            act.Should().Throw<ArgumentOutOfRangeException>();
+            act.Should().Throw<ArgumentOutOfRangeException>()
+                .WithMessage("*Starting bid must be greater than zero*");
+        }
+
+        [Fact]
+        public void Constructor_WithEmptyVehicleId_ShouldThrowVehicleIdRequiredException()
+        {
+            // Act
+            var act = () => new Auction(Guid.Empty, 1000m);
+
+            // Assert
+            act.Should().Throw<ArgumentException>()
+                .WithMessage("*VehicleId*");
         }
 
         // ─── Start ──────────────────────────────────────────────────────────────
@@ -71,6 +79,7 @@ namespace CarAuction.Tests
             auction.Status.Should().Be(AuctionStatus.Active);
             auction.StartedAt.Should().NotBeNull();
             auction.StartedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+            auction.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
         }
 
         [Fact]
@@ -79,14 +88,16 @@ namespace CarAuction.Tests
             // Arrange
             var auction = CreateAuction();
             auction.Start();
-            var startedAt = auction.StartedAt; // guarda o timestamp original
+            var startedAt = auction.StartedAt;
+            var updatedAt = auction.UpdatedAt;
 
-            // Act — chama Start() uma segunda vez
+            // Act
             auction.Start();
 
-            // Assert — estado não muda, timestamp não muda
+            // Assert - não deve mudar nada
             auction.Status.Should().Be(AuctionStatus.Active);
-            auction.StartedAt.Should().Be(startedAt); // timestamp original mantido
+            auction.StartedAt.Should().Be(startedAt);
+            auction.UpdatedAt.Should().Be(updatedAt); // não atualiza timestamp
         }
 
         [Fact]
@@ -120,6 +131,7 @@ namespace CarAuction.Tests
             auction.Status.Should().Be(AuctionStatus.Closed);
             auction.ClosedAt.Should().NotBeNull();
             auction.ClosedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+            auction.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
         }
 
         [Fact]
@@ -129,14 +141,16 @@ namespace CarAuction.Tests
             var auction = CreateAuction();
             auction.Start();
             auction.Close();
-            var closedAt = auction.ClosedAt; // guarda timestamp original
+            var closedAt = auction.ClosedAt;
+            var updatedAt = auction.UpdatedAt;
 
-            // Act — chama Close() uma segunda vez
+            // Act
             auction.Close();
 
-            // Assert — estado não muda, timestamp não muda
+            // Assert - não deve mudar nada
             auction.Status.Should().Be(AuctionStatus.Closed);
             auction.ClosedAt.Should().Be(closedAt);
+            auction.UpdatedAt.Should().Be(updatedAt);
         }
 
         [Fact]
@@ -155,63 +169,49 @@ namespace CarAuction.Tests
         // ─── PlaceBid ───────────────────────────────────────────────────────────
 
         [Fact]
-        public void PlaceBid_WhenActive_ShouldAddBidAndUpdateHighestBid()
+        public void PlaceBid_WhenActiveAndValidAmount_ShouldAddBid()
         {
             // Arrange
             var auction = CreateAuction(startingBid: 1000m);
             auction.Start();
             var bidderId = Guid.NewGuid();
+            var bidAmount = 1500m;
 
             // Act
-            auction.PlaceBid(bidderId, 1500m);
+            auction.PlaceBid(bidderId, bidAmount);
 
             // Assert
+            auction.CurrentHighestBid.Should().Be(bidAmount);
             auction.Bids.Should().HaveCount(1);
-            auction.CurrentHighestBid.Should().Be(1500m);
-            auction.Bids.First().Amount.Should().Be(1500m);
             auction.Bids.First().BidderId.Should().Be(bidderId);
+            auction.Bids.First().Amount.Should().Be(bidAmount);
+            auction.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
         }
 
         [Fact]
-        public void PlaceBid_MultipleBids_ShouldTrackAllBidsAndUpdateHighest()
+        public void PlaceBid_WithMultipleBids_ShouldTrackHighestBid()
         {
             // Arrange
             var auction = CreateAuction(startingBid: 1000m);
             auction.Start();
 
             // Act
+            auction.PlaceBid(Guid.NewGuid(), 1200m);
             auction.PlaceBid(Guid.NewGuid(), 1500m);
             auction.PlaceBid(Guid.NewGuid(), 2000m);
-            auction.PlaceBid(Guid.NewGuid(), 2500m);
 
             // Assert
+            auction.CurrentHighestBid.Should().Be(2000m);
             auction.Bids.Should().HaveCount(3);
-            auction.CurrentHighestBid.Should().Be(2500m);
-        }
-
-        [Theory]
-        [InlineData(1000, 500)]   // bid menor que starting bid
-        [InlineData(1000, 1000)]  // bid igual ao atual
-        [InlineData(1500, 1200)]  // bid menor que bid existente
-        public void PlaceBid_WithAmountNotHigherThanCurrent_ShouldThrowInvalidBidException(
-            decimal currentHighest, decimal newBid)
-        {
-            // Arrange
-            var auction = CreateAuction(startingBid: currentHighest);
-            auction.Start();
-
-            // Act
-            var act = () => auction.PlaceBid(Guid.NewGuid(), newBid);
-
-            // Assert
-            act.Should().Throw<InvalidBidException>();
+            auction.Bids.Last().Amount.Should().Be(2000m);
         }
 
         [Fact]
         public void PlaceBid_WhenNotActive_ShouldThrowAuctionNotActiveException()
         {
-            // Arrange — leilão ainda Scheduled
+            // Arrange
             var auction = CreateAuction();
+            // Não chama Start() - fica Scheduled
 
             // Act
             var act = () => auction.PlaceBid(Guid.NewGuid(), 1500m);
@@ -235,40 +235,58 @@ namespace CarAuction.Tests
             act.Should().Throw<AuctionNotActiveException>();
         }
 
-        // ─── Concorrência ───────────────────────────────────────────────────────
-
-        [Fact]
-        public void PlaceBid_ConcurrentBids_ShouldOnlyAcceptHigherBids()
+        [Theory]
+        [InlineData(1000)] // igual ao starting bid
+        [InlineData(999)]  // menor que starting bid
+        [InlineData(500)]  // muito menor
+        [InlineData(0)]    // zero
+        [InlineData(-100)] // negativo
+        public void PlaceBid_WhenAmountNotHigherThanCurrent_ShouldThrowInvalidBidException(decimal invalidAmount)
         {
             // Arrange
             var auction = CreateAuction(startingBid: 1000m);
             auction.Start();
 
-            // Act — simula bids concorrentes
-            // em memória não há threading issues, mas testamos a lógica
-            auction.PlaceBid(Guid.NewGuid(), 1500m);
-
-            var act = () => auction.PlaceBid(Guid.NewGuid(), 1200m); // bid mais baixo
+            // Act
+            var act = () => auction.PlaceBid(Guid.NewGuid(), invalidAmount);
 
             // Assert
-            act.Should().Throw<InvalidBidException>();
-            auction.CurrentHighestBid.Should().Be(1500m); // estado não corrompido
-            auction.Bids.Should().HaveCount(1); // só o bid válido
+            act.Should().Throw<InvalidBidException>()
+                .Which.BidAmount.Should().Be(invalidAmount);
         }
-
-        // ─── Imutabilidade ──────────────────────────────────────────────────────
 
         [Fact]
-        public void Bids_ShouldBeReadOnly_CannotBeModifiedExternally()
+        public void PlaceBid_WhenAmountNotHigherThanPreviousBid_ShouldThrowInvalidBidException()
         {
             // Arrange
-            var auction = CreateAuction();
+            var auction = CreateAuction(startingBid: 1000m);
+            auction.Start();
+            auction.PlaceBid(Guid.NewGuid(), 1500m);
 
-            // Act & Assert — tenta modificar a coleção de fora
-            // IReadOnlyCollection não tem Add() — isto é verificado em compilação
-            // mas verificamos que a interface é readonly
-            auction.Bids.Should().BeAssignableTo<IReadOnlyCollection<Bid>>();
+            // Act - tenta dar lance igual ao anterior
+            var act = () => auction.PlaceBid(Guid.NewGuid(), 1500m);
+
+            // Assert
+            act.Should().Throw<InvalidBidException>()
+                .Which.CurrentHighestBid.Should().Be(1500m);
+        }
+
+
+        [Fact]
+        public void Close_ShouldPreserveBids()
+        {
+            // Arrange
+            var auction = CreateAuction(startingBid: 1000m);
+            auction.Start();
+            auction.PlaceBid(Guid.NewGuid(), 1200m);
+            auction.PlaceBid(Guid.NewGuid(), 1500m);
+
+            // Act
+            auction.Close();
+
+            // Assert
+            auction.Bids.Should().HaveCount(2);
+            auction.CurrentHighestBid.Should().Be(1500m);
         }
     }
-
 }

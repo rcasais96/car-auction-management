@@ -1,15 +1,14 @@
 ﻿using CarAuction.Application.DTOs.Vehicles;
 using CarAuction.Application.Exceptions;
 using CarAuction.Application.Factories;
+using CarAuction.Application.Services.Interfaces;
 using CarAuction.Application.Utils;
-using CarAuction.Domain.Exceptions;
 using CarAuction.Domain.Repositories;
 using System.Collections.Concurrent;
-using System.Threading;
 
 namespace CarAuction.Application.Services
 {
-    public class VehicleService 
+    public class VehicleService : IVehicleService
     {
         private readonly IVehicleRepository _vehicleRepository;
         private static readonly ConcurrentDictionary<Guid, SemaphoreSlim> _vehicleLocks = new();

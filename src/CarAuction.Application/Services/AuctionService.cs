@@ -1,5 +1,6 @@
 ﻿using CarAuction.Application.DTOs.Auctions;
 using CarAuction.Application.Exceptions;
+using CarAuction.Application.Services.Interfaces;
 using CarAuction.Application.Utils;
 using CarAuction.Domain.Entities;
 using CarAuction.Domain.Exceptions;
@@ -8,7 +9,7 @@ using System.Collections.Concurrent;
 
 namespace CarAuction.Application.Services
 {
-    public class AuctionService
+    public class AuctionService : IAuctionService
     {
         private readonly IAuctionRepository _auctionRepository;
         private readonly IVehicleRepository _vehicleRepository;
