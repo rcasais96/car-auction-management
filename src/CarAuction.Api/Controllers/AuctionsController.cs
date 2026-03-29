@@ -1,5 +1,6 @@
 ﻿using CarAuction.Application.DTOs.Auctions;
 using CarAuction.Application.Services;
+using CarAuction.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarAuction.Api.Controllers
@@ -8,9 +9,9 @@ namespace CarAuction.Api.Controllers
     [Route("api/auctions")]
     public class AuctionsController : ControllerBase
     {
-        private readonly AuctionService _auctionService;
+        private readonly IAuctionService _auctionService;
 
-        public AuctionsController(AuctionService auctionService)
+        public AuctionsController(IAuctionService auctionService)
         {
             _auctionService = auctionService;
         }

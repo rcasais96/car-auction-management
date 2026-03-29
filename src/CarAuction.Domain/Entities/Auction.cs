@@ -20,6 +20,8 @@ namespace CarAuction.Domain.Entities
         private readonly List<Bid> _bids = new();
         public IReadOnlyCollection<Bid> Bids => _bids.AsReadOnly();
 
+        public IEnumerable<Bid> bids1  => _bids.AsReadOnly();
+
         private Auction() { }
 
         public Auction(Guid vehicleId, decimal startingBid)
@@ -76,6 +78,8 @@ namespace CarAuction.Domain.Entities
 
             var bid = new Bid(Id, bidderId, amount);
             _bids.Add(bid);
+ 
+
             CurrentHighestBid = amount;
             UpdatedAt = DateTime.UtcNow;
         }

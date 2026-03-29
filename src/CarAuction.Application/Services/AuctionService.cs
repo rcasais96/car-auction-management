@@ -14,10 +14,15 @@ namespace CarAuction.Application.Services
         private readonly IAuctionRepository _auctionRepository;
         private readonly IVehicleRepository _vehicleRepository;
 
-        private static readonly SemaphoreSlim _createAuctionLock = new(1, 1);
         private static readonly ConcurrentDictionary<Guid, SemaphoreSlim> _auctionLocks = new();
+        private static readonly ConcurrentDictionary<Guid, SemaphoreSlim> _vehiclesLocks = new();
+
+
         private static SemaphoreSlim GetAuctionLock(Guid auctionId)
         => _auctionLocks.GetOrAdd(auctionId, _ => new SemaphoreSlim(1, 1));
+        
+        private static SemaphoreSlim GetVehicleLock(Guid vehicleId)
+        => _vehiclesLocks.GetOrAdd(vehicleId, _ => new SemaphoreSlim(1, 1));
 
         public AuctionService(
             IAuctionRepository auctionRepository,
@@ -40,7 +45,9 @@ namespace CarAuction.Application.Services
             var vehicle = await _vehicleRepository.GetByIdAsync(request.VehicleId, cancellationToken)
                 ?? throw new VehicleNotFoundException(request.VehicleId);
 
-            await _createAuctionLock.WaitAsync(cancellationToken);
+            var vehicleLock = GetVehicleLock(vehicle.Id);
+
+            await vehicleLock.WaitAsync(cancellationToken);
             try
             {
                 if (await _auctionRepository.HasActiveAuctionAsync(request.VehicleId, cancellationToken))
@@ -53,7 +60,7 @@ namespace CarAuction.Application.Services
             }
             finally
             {
-                _createAuctionLock.Release();
+                vehicleLock.Release();
             }
         }
 
