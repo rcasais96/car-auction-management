@@ -6,7 +6,12 @@ namespace CarAuction.Application.Exceptions
 {
     public class AuctionNotFoundException : Exception
     {
-        public AuctionNotFoundException(Guid id)
-            : base($"Auction {id} not found") { }
+        public Guid AuctionId { get; }
+
+        public AuctionNotFoundException(Guid auctionId)
+            : base($"Auction with ID {auctionId} not found")
+        {
+            AuctionId = auctionId;
+        }
     }
 }

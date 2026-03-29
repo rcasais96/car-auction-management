@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CarAuction.Application.Exceptions
+﻿namespace CarAuction.Application.Exceptions
 {
     public class DuplicateVehicleException : Exception
     {
-        public DuplicateVehicleException(Guid id)
-            : base($"Vehicle {id} already exists") { }
+        public Guid VehicleId { get; }
+
+        public DuplicateVehicleException(Guid vehicleId)
+            : base($"Vehicle with ID {vehicleId} already exists in inventory")
+        {
+            VehicleId = vehicleId;
+        }
     }
 }

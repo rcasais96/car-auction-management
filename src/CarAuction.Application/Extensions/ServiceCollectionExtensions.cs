@@ -1,8 +1,6 @@
 ﻿using CarAuction.Application.Services;
+using CarAuction.Application.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CarAuction.Application.Extensions
 {
@@ -11,8 +9,8 @@ namespace CarAuction.Application.Extensions
         public static IServiceCollection AddApplication(
             this IServiceCollection services)
         {
-            services.AddScoped<VehicleService>();
-            services.AddScoped<AuctionService>();
+            services.AddScoped<IVehicleService, VehicleService>();
+            services.AddScoped<IAuctionService,AuctionService>();
             return services;
         }
     }

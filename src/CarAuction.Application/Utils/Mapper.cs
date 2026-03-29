@@ -2,9 +2,6 @@
 using CarAuction.Application.DTOs.Vehicles;
 using CarAuction.Domain;
 using CarAuction.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CarAuction.Application.Utils
 {
@@ -45,7 +42,7 @@ namespace CarAuction.Application.Utils
             Year = vehicle.Year,
             StartingBid = vehicle.StartingBid,
             Type = vehicle.Type,
-            NumberOfDoors = (vehicle as Hatchback)?.NumberOfDoors ?? (vehicle as Sedan)?.NumberOfDoors,
+            NumberOfDoors = (vehicle as DoorBasedVehicle)?.NumberOfDoors,
             NumberOfSeats = (vehicle as Suv)?.NumberOfSeats,
             LoadCapacity = (vehicle as Truck)?.LoadCapacity
         };

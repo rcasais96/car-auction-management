@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Itens de Solução/">
+    <File Path="README.txt" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/CarAuction.Api/CarAuction.Api.csproj" />
     <Project Path="src/CarAuction.Application/CarAuction.Application.csproj" />
