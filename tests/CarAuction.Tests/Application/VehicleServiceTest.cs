@@ -14,6 +14,7 @@ namespace CarAuction.Tests.Application
     {
         private readonly Mock<IVehicleRepository> _vehicleRepositoryMock;
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+
         private readonly IVehicleService _sut;
 
         public VehicleServiceTests()
@@ -24,6 +25,8 @@ namespace CarAuction.Tests.Application
             _unitOfWorkMock
            .Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
            .ReturnsAsync(0);
+
+        
 
             _sut = new VehicleService(_vehicleRepositoryMock.Object, _unitOfWorkMock.Object);
         }

@@ -5,9 +5,13 @@ using CarAuction.Application.Services;
 using CarAuction.Application.Services.Interfaces;
 using CarAuction.Domain.Entities;
 using CarAuction.Domain.Exceptions;
+using CarAuction.Infrastructure.Cache;
 using CarAuction.Infrastructure.Database;
 using CarAuction.Infrastructure.Repositories.InMemory;
 using FluentAssertions;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
+using Moq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -24,10 +28,13 @@ namespace CarAuction.Tests.Integration
 
         public ConcurrencyTests()
         {
+            var mockL1 = new Mock<IMemoryCache>();
+            var mockL2 = new Mock<IDistributedCache>();
+
+
             _vehicleService = new VehicleService(_vehicleRepo, new InMemoryUnitOfWork());
             _auctionService = new AuctionService(_auctionRepo, _vehicleRepo, new InMemoryUnitOfWork());
         }
-
         // testa que dois leilões não são criados simultaneamente para o mesmo veículo quando já está num leilão ativo
         [Fact]
         public async Task CreateAuction_Concurrent_ShouldOnlyCreateOne()

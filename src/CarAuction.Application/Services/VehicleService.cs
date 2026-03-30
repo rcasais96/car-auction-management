@@ -3,8 +3,11 @@ using CarAuction.Application.Exceptions;
 using CarAuction.Application.Factories;
 using CarAuction.Application.Services.Interfaces;
 using CarAuction.Application.Utils;
+using CarAuction.Domain;
+using CarAuction.Domain.Entities;
 using CarAuction.Domain.Repositories;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace CarAuction.Application.Services
 {
@@ -12,6 +15,7 @@ namespace CarAuction.Application.Services
     {
         private readonly IVehicleRepository _vehicleRepository;
         private readonly IUnitOfWork _unitOfWork;
+
 
         private static readonly ConcurrentDictionary<Guid, SemaphoreSlim> _vehicleLocks = new();
 
@@ -24,6 +28,7 @@ namespace CarAuction.Application.Services
 
         public async Task<VehicleDTO> GetByIdAsync(Guid vehicleId, CancellationToken cancellationToken = default)
         {
+
             var vehicle = await _vehicleRepository.GetByIdAsync(vehicleId, cancellationToken)
             ?? throw new VehicleNotFoundException(vehicleId);
 
@@ -67,9 +72,11 @@ namespace CarAuction.Application.Services
         }
         public async Task<IEnumerable<VehicleDTO>> SearchVehiclesAsync(VehicleSearchCriteriaDTO criteria, CancellationToken cancellationToken = default)
         {
+
             var dto = Mapper.MapToResponse(criteria);
 
             var vehicles = await _vehicleRepository.SearchAsync(dto, cancellationToken);
+
             return vehicles.Select(Mapper.MapToResponse);
         }
 

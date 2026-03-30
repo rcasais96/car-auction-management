@@ -5,9 +5,13 @@ using CarAuction.Application.Exceptions;
 using CarAuction.Application.Services;
 using CarAuction.Application.Services.Interfaces;
 using CarAuction.Domain.Entities;
+using CarAuction.Infrastructure.Cache;
 using CarAuction.Infrastructure.Database;
 using CarAuction.Infrastructure.Repositories.InMemory;
 using FluentAssertions;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Memory;
+using Moq;
 
 namespace CarAuction.Tests.Integration
 {
@@ -18,8 +22,12 @@ namespace CarAuction.Tests.Integration
 
         public VehicleIntegrationTests()
         {
+            var mockL1 = new Mock<IMemoryCache>();
+            var mockL2 = new Mock<IDistributedCache>();
+
             _vehicleService = new VehicleService(_vehicleRepo, new InMemoryUnitOfWork());
         }
+
 
         private static CreateVehicleRequest DefaultSedanRequest(Guid? id = null) => new()
         {

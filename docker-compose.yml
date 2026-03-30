@@ -3,12 +3,18 @@
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: car-auction-sqlserver
     ports:
-      - "1434:1433"  
+      - "1434:1433"
     environment:
       SA_PASSWORD: CarAuctionBCA_123!
       ACCEPT_EULA: Y
     volumes:
       - sqlserver_data:/var/opt/mssql
+
+  redis:
+    image: redis:7-alpine
+    container_name: car-auction-redis
+    ports:
+      - "6379:6379"
 
 volumes:
   sqlserver_data:
