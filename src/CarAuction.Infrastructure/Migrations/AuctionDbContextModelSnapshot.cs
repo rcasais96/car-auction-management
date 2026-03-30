@@ -157,6 +157,15 @@ namespace CarAuction.Infrastructure.Migrations
                     b.HasDiscriminator().HasValue(3);
                 });
 
+            modelBuilder.Entity("CarAuction.Domain.Entities.Auction", b =>
+                {
+                    b.HasOne("CarAuction.Domain.Entities.Vehicle", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CarAuction.Domain.Entities.Bid", b =>
                 {
                     b.HasOne("CarAuction.Domain.Entities.Auction", null)

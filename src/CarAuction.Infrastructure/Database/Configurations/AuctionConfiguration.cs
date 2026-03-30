@@ -24,6 +24,11 @@ namespace CarAuction.Infrastructure.Database.Configurations
                 .HasConversion<string>()
                 .HasMaxLength(20);
 
+            builder.HasOne<Vehicle>()
+                .WithMany()
+                .HasForeignKey(a => a.VehicleId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // ← liga o Navigation ao HasMany para evitar shadow property
             builder.HasMany(a => a.Bids)
                 .WithOne()

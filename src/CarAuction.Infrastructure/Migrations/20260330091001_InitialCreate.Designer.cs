@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarAuction.Infrastructure.Migrations
 {
     [DbContext(typeof(AuctionDbContext))]
-    [Migration("20260330090307_InitialCreate")]
+    [Migration("20260330091001_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -158,6 +158,15 @@ namespace CarAuction.Infrastructure.Migrations
                     b.HasBaseType("CarAuction.Domain.Entities.Vehicle");
 
                     b.HasDiscriminator().HasValue(3);
+                });
+
+            modelBuilder.Entity("CarAuction.Domain.Entities.Auction", b =>
+                {
+                    b.HasOne("CarAuction.Domain.Entities.Vehicle", null)
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("CarAuction.Domain.Entities.Bid", b =>
