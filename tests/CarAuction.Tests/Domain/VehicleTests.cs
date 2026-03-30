@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using CarAuction.Domain.Entities;
 using FluentAssertions;
 
@@ -6,12 +6,13 @@ namespace CarAuction.Tests.Domain
 {
     public class VehicleTests
     {
-        // ─── Sedan ──────────────────────────────────────────────────────────────
-
+        /// <summary>
+        /// Verifica que um Sedan é criado com todos os dados corretos incluindo tipo e número de portas.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public void Sedan_WithValidData_ShouldCreate()
         {
-            // Arrange & Act
             var sedan = new Sedan(
                 manufacturer: "Toyota",
                 model: "Camry",
@@ -20,7 +21,6 @@ namespace CarAuction.Tests.Domain
                 numberOfDoors: 4
             );
 
-            // Assert
             sedan.Id.Should().NotBe(Guid.Empty);
             sedan.Manufacturer.Should().Be("Toyota");
             sedan.Model.Should().Be("Camry");
@@ -30,13 +30,15 @@ namespace CarAuction.Tests.Domain
             sedan.Type.Should().Be(VehicleType.Sedan);
         }
 
+        /// <summary>
+        /// Verifica que um Sedan utiliza o ID externo fornecido em vez de gerar um novo.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public void Sedan_WithExternalId_ShouldUseProvidedId()
         {
-            // Arrange
             var externalId = Guid.NewGuid();
 
-            // Act
             var sedan = new Sedan(
                 manufacturer: "Honda",
                 model: "Accord",
@@ -46,31 +48,31 @@ namespace CarAuction.Tests.Domain
                 id: externalId
             );
 
-            // Assert
             sedan.Id.Should().Be(externalId);
         }
 
+        /// <summary>
+        /// Verifica que criar um Sedan com número de portas inválido lança ArgumentOutOfRangeException.
+        /// </summary>
+        /// <returns></returns>
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
         public void Sedan_WithInvalidNumberOfDoors_ShouldThrowArgumentException(int invalidDoors)
         {
-            // Act
             var act = () => new Sedan("Toyota", "Camry", 2024, 5000m, invalidDoors);
 
-            // Assert
             act.Should().Throw<ArgumentOutOfRangeException>()
                 .WithMessage("*Number of doors must be greater than zero*");
         }
 
-
-
-        // ─── SUV ────────────────────────────────────────────────────────────────
-
+        /// <summary>
+        /// Verifica que um SUV é criado com os dados corretos incluindo número de lugares.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public void Suv_WithValidData_ShouldCreate()
         {
-            // Act
             var suv = new Suv(
                 manufacturer: "Toyota",
                 model: "RAV4",
@@ -79,32 +81,34 @@ namespace CarAuction.Tests.Domain
                 numberOfSeats: 7
             );
 
-            // Assert
             suv.Id.Should().NotBe(Guid.Empty);
             suv.StartingBid.Should().Be(7000m);
             suv.NumberOfSeats.Should().Be(7);
             suv.Type.Should().Be(VehicleType.Suv);
         }
 
+        /// <summary>
+        /// Verifica que criar um SUV com número de lugares inválido lança ArgumentOutOfRangeException.
+        /// </summary>
+        /// <returns></returns>
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
         public void Suv_WithInvalidNumberOfSeats_ShouldThrowArgumentOutOfRangeException(int invalidSeats)
         {
-            // Act
             var act = () => new Suv("Toyota", "RAV4", 2024, 7000m, invalidSeats);
 
-            // Assert
             act.Should().Throw<ArgumentOutOfRangeException>()
                 .WithMessage("*Number of seats must be greater than zero*");
         }
 
-        // ─── Truck ──────────────────────────────────────────────────────────────
-
+        /// <summary>
+        /// Verifica que uma Camioneta é criada com os dados corretos incluindo capacidade de carga.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public void Truck_WithValidData_ShouldCreate()
         {
-            // Act
             var truck = new Truck(
                 manufacturer: "Ford",
                 model: "F-150",
@@ -113,29 +117,32 @@ namespace CarAuction.Tests.Domain
                 loadCapacity: 1500.5m
             );
 
-            // Assert
             truck.Id.Should().NotBe(Guid.Empty);
             truck.StartingBid.Should().Be(10000m);
             truck.LoadCapacity.Should().Be(1500.5m);
             truck.Type.Should().Be(VehicleType.Truck);
         }
 
+        /// <summary>
+        /// Verifica que criar uma Camioneta com capacidade de carga inválida lança ArgumentOutOfRangeException.
+        /// </summary>
+        /// <returns></returns>
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
         [InlineData(-100.5)]
         public void Truck_WithInvalidLoadCapacity_ShouldThrowArgumentOutOfRangeException(decimal invalidCapacity)
         {
-            // Act
             var act = () => new Truck("Ford", "F-150", 2024, 10000m, invalidCapacity);
 
-            // Assert
             act.Should().Throw<ArgumentOutOfRangeException>()
                 .WithMessage("*Load capacity must be greater than zero*");
         }
 
-        // ─── Base Vehicle Validation ────────────────────────────────────────────
-
+        /// <summary>
+        /// Verifica que criar um veículo com fabricante nulo, vazio ou só espaços lança ArgumentException.
+        /// </summary>
+        /// <returns></returns>
         [Theory]
         [InlineData("", "Model", 2024)]
         [InlineData(null, "Model", 2024)]
@@ -143,14 +150,16 @@ namespace CarAuction.Tests.Domain
         public void Vehicle_WithInvalidManufacturer_ShouldThrowArgumentException(
             string invalidManufacturer, string model, int year)
         {
-            // Act
             var act = () => new Sedan(invalidManufacturer, model, year, 5000m, 4);
 
-            // Assert
             act.Should().Throw<ArgumentException>()
                 .WithParameterName("manufacturer");
         }
 
+        /// <summary>
+        /// Verifica que criar um veículo com modelo nulo, vazio ou só espaços lança ArgumentException.
+        /// </summary>
+        /// <returns></returns>
         [Theory]
         [InlineData("Toyota", "", 2024)]
         [InlineData("Toyota", null, 2024)]
@@ -158,43 +167,47 @@ namespace CarAuction.Tests.Domain
         public void Vehicle_WithInvalidModel_ShouldThrowArgumentException(
             string manufacturer, string invalidModel, int year)
         {
-            // Act
             var act = () => new Sedan(manufacturer, invalidModel, year, 5000m, 4);
 
-            // Assert
             act.Should().Throw<ArgumentException>()
                 .WithParameterName("model");
         }
 
+        /// <summary>
+        /// Verifica que criar um veículo com ano inválido (antes de 1886, zero ou negativo) lança ArgumentOutOfRangeException.
+        /// </summary>
+        /// <returns></returns>
         [Theory]
-        [InlineData(1885)] // antes do primeiro carro
+        [InlineData(1885)]
         [InlineData(0)]
         [InlineData(-1)]
         public void Vehicle_WithInvalidYear_ShouldThrowArgumentOutOfRangeException(int invalidYear)
         {
-            // Act
             var act = () => new Sedan("Toyota", "Camry", invalidYear, 5000m, 4);
 
-            // Assert
             act.Should().Throw<ArgumentOutOfRangeException>()
                 .WithParameterName("year");
         }
 
+        /// <summary>
+        /// Verifica que criar um veículo com ano mais de um ano acima do atual lança ArgumentOutOfRangeException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public void Vehicle_WithFutureYear_ShouldThrowArgumentOutOfRangeException()
         {
-            // Arrange
             var futureYear = DateTime.UtcNow.Year + 2;
 
-            // Act
             var act = () => new Sedan("Toyota", "Camry", futureYear, 5000m, 4);
 
-            // Assert
             act.Should().Throw<ArgumentOutOfRangeException>()
                 .WithParameterName("year");
         }
 
-
+        /// <summary>
+        /// Verifica que criar um veículo com lance inicial zero ou negativo lança ArgumentOutOfRangeException.
+        /// </summary>
+        /// <returns></returns>
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
@@ -202,15 +215,11 @@ namespace CarAuction.Tests.Domain
         [InlineData(-0.01)]
         public void Vehicle_WithInvalidStartingBid_ShouldThrowArgumentOutOfRangeException(decimal invalidBid)
         {
-            // Act
             var act = () => new Sedan("Toyota", "Camry", 2024, invalidBid, 4);
 
-            // Assert
             act.Should().Throw<ArgumentOutOfRangeException>()
                 .WithParameterName("startingBid")
                 .WithMessage("*Starting bid must be greater than zero*");
         }
-
-
     }
 }

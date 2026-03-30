@@ -1,4 +1,4 @@
-﻿using CarAuction.Application.DTOs.Auctions;
+using CarAuction.Application.DTOs.Auctions;
 using CarAuction.Application.Exceptions;
 using CarAuction.Application.Services;
 using CarAuction.Application.Services.Interfaces;
@@ -24,8 +24,6 @@ namespace CarAuction.Tests.Application
                 _auctionRepositoryMock.Object,
                 _vehicleRepositoryMock.Object);
         }
-
-        // ─── Helpers ─────────────────────────────────────────────────────────────
 
         private static Vehicle CreateVehicle(Guid? id = null)
             => new Sedan("Toyota", "Camry", 2024, 5000m, 4, id);
@@ -65,8 +63,10 @@ namespace CarAuction.Tests.Application
                 .Returns(Task.CompletedTask);
         }
 
-        // ─── CreateAuctionAsync ──────────────────────────────────────────────────
-
+        /// <summary>
+        /// Verifica que criar um leilão com veículo existente retorna um leilão Scheduled e persiste no repositório.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task CreateAuctionAsync_WithValidVehicle_ShouldCreateScheduledAuction()
         {
@@ -90,6 +90,10 @@ namespace CarAuction.Tests.Application
                 Times.Once);
         }
 
+        /// <summary>
+        /// Verifica que criar um leilão para um veículo inexistente lança VehicleNotFoundException sem aceder ao repositório de leilões.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task CreateAuctionAsync_WithNonExistentVehicle_ShouldThrowVehicleNotFoundException()
         {
@@ -112,6 +116,10 @@ namespace CarAuction.Tests.Application
                 Times.Never);
         }
 
+        /// <summary>
+        /// Verifica que criar um leilão para um veículo já em leilão ativo lança VehicleAlreadyInActiveAuctionException sem persistir.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task CreateAuctionAsync_WithVehicleAlreadyInActiveAuction_ShouldThrowException()
         {
@@ -132,6 +140,10 @@ namespace CarAuction.Tests.Application
                 Times.Never);
         }
 
+        /// <summary>
+        /// Verifica que é possível criar um novo leilão para um veículo cujo leilão anterior foi encerrado.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task CreateAuctionAsync_AfterPreviousAuctionClosed_ShouldAllowNewAuction()
         {
@@ -149,8 +161,10 @@ namespace CarAuction.Tests.Application
             result.VehicleId.Should().Be(vehicleId);
         }
 
-        // ─── StartAuctionAsync ───────────────────────────────────────────────────
-
+        /// <summary>
+        /// Verifica que iniciar um leilão agendado retorna o leilão com status Active e StartedAt preenchido.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task StartAuctionAsync_WhenScheduled_ShouldReturnActiveAuction()
         {
@@ -166,6 +180,10 @@ namespace CarAuction.Tests.Application
             auction.Status.Should().Be(AuctionStatus.Active);
         }
 
+        /// <summary>
+        /// Verifica que iniciar um leilão já ativo não lança exceção.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task StartAuctionAsync_WhenAlreadyActive_ShouldBeIdempotent()
         {
@@ -180,6 +198,10 @@ namespace CarAuction.Tests.Application
             await act.Should().NotThrowAsync();
         }
 
+        /// <summary>
+        /// Verifica que tentar iniciar um leilão inexistente lança AuctionNotFoundException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task StartAuctionAsync_WhenNotFound_ShouldThrowAuctionNotFoundException()
         {
@@ -193,8 +215,28 @@ namespace CarAuction.Tests.Application
                 .Where(e => e.AuctionId == auctionId);
         }
 
-        // ─── CloseAuctionAsync ───────────────────────────────────────────────────
+        /// <summary>
+        /// Verifica que tentar iniciar um leilão já fechado lança AuctionAlreadyCloseException.
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task StartAuctionAsync_WhenClosed_ShouldThrowAuctionAlreadyCloseException()
+        {
+            var auctionId = Guid.NewGuid();
+            var auction = CreateActiveAuction();
+            auction.Close();
 
+            SetupAuction(auctionId, auction);
+
+            var act = async () => await _sut.StartAuctionAsync(auctionId);
+
+            await act.Should().ThrowAsync<AuctionAlreadyCloseException>();
+        }
+
+        /// <summary>
+        /// Verifica que fechar um leilão ativo altera o status para Closed e define o ClosedAt.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task CloseAuctionAsync_WhenActive_ShouldReturnClosedAuction()
         {
@@ -209,6 +251,10 @@ namespace CarAuction.Tests.Application
             auction.ClosedAt.Should().NotBeNull();
         }
 
+        /// <summary>
+        /// Verifica que fechar um leilão já fechado não lança exceção.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task CloseAuctionAsync_WhenAlreadyClosed_ShouldBeIdempotent()
         {
@@ -223,6 +269,10 @@ namespace CarAuction.Tests.Application
             await act.Should().NotThrowAsync();
         }
 
+        /// <summary>
+        /// Verifica que tentar fechar um leilão não iniciado lança AuctionNotStartedException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task CloseAuctionAsync_WhenScheduled_ShouldThrowAuctionNotStartedException()
         {
@@ -236,6 +286,10 @@ namespace CarAuction.Tests.Application
             await act.Should().ThrowAsync<AuctionNotStartedException>();
         }
 
+        /// <summary>
+        /// Verifica que tentar fechar um leilão inexistente lança AuctionNotFoundException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task CloseAuctionAsync_WhenNotFound_ShouldThrowAuctionNotFoundException()
         {
@@ -248,8 +302,10 @@ namespace CarAuction.Tests.Application
             await act.Should().ThrowAsync<AuctionNotFoundException>();
         }
 
-        // ─── PlaceBidAsync ───────────────────────────────────────────────────────
-
+        /// <summary>
+        /// Verifica que um lance válido num leilão ativo retorna o DTO do lance e atualiza o lance mais alto.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task PlaceBidAsync_WithValidBid_ShouldReturnBidDTO()
         {
@@ -268,6 +324,10 @@ namespace CarAuction.Tests.Application
             auction.CurrentHighestBid.Should().Be(1500m);
         }
 
+        /// <summary>
+        /// Verifica que múltiplos lances são todos registados e o lance mais alto é corretamente atualizado.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task PlaceBidAsync_WithMultipleBids_ShouldTrackAllBids()
         {
@@ -290,6 +350,10 @@ namespace CarAuction.Tests.Application
             auction.Bids.Should().HaveCount(3);
         }
 
+        /// <summary>
+        /// Verifica que tentar dar um lance num leilão inexistente lança AuctionNotFoundException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task PlaceBidAsync_WhenAuctionNotFound_ShouldThrowAuctionNotFoundException()
         {
@@ -303,6 +367,10 @@ namespace CarAuction.Tests.Application
             await act.Should().ThrowAsync<AuctionNotFoundException>();
         }
 
+        /// <summary>
+        /// Verifica que tentar dar um lance num leilão agendado lança AuctionNotActiveException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task PlaceBidAsync_WhenScheduled_ShouldThrowAuctionNotActiveException()
         {
@@ -317,6 +385,10 @@ namespace CarAuction.Tests.Application
             await act.Should().ThrowAsync<AuctionNotActiveException>();
         }
 
+        /// <summary>
+        /// Verifica que tentar dar um lance num leilão fechado lança AuctionNotActiveException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task PlaceBidAsync_WhenClosed_ShouldThrowAuctionNotActiveException()
         {
@@ -332,12 +404,16 @@ namespace CarAuction.Tests.Application
             await act.Should().ThrowAsync<AuctionNotActiveException>();
         }
 
+        /// <summary>
+        /// Verifica que um lance com valor igual ou inferior ao lance atual lança InvalidBidException com os dados corretos.
+        /// </summary>
+        /// <returns></returns>
         [Theory]
-        [InlineData(1000)] // igual ao starting bid
-        [InlineData(999)]  // menor
-        [InlineData(500)]  // muito menor
-        [InlineData(0)]    // zero
-        [InlineData(-100)] // negativo
+        [InlineData(1000)]
+        [InlineData(999)]
+        [InlineData(500)]
+        [InlineData(0)]
+        [InlineData(-100)]
         public async Task PlaceBidAsync_WithInvalidAmount_ShouldThrowInvalidBidException(
             decimal invalidAmount)
         {
@@ -353,8 +429,10 @@ namespace CarAuction.Tests.Application
                 .Where(e => e.BidAmount == invalidAmount && e.CurrentHighestBid == 1000m);
         }
 
-        // ─── GetByIdAsync ─────────────────────────────────────────────────────────
-
+        /// <summary>
+        /// Verifica que obter um leilão existente retorna o DTO com os dados corretos.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task GetByIdAsync_WhenExists_ShouldReturnAuctionDTO()
         {
@@ -369,6 +447,10 @@ namespace CarAuction.Tests.Application
             result.StartingBid.Should().Be(1000m);
         }
 
+        /// <summary>
+        /// Verifica que obter um leilão inexistente lança AuctionNotFoundException com o ID correto.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task GetByIdAsync_WhenNotFound_ShouldThrowAuctionNotFoundException()
         {
@@ -380,20 +462,6 @@ namespace CarAuction.Tests.Application
 
             await act.Should().ThrowAsync<AuctionNotFoundException>()
                 .Where(e => e.AuctionId == auctionId);
-        }
-
-        [Fact]
-        public async Task StartAuctionAsync_WhenClosed_ShouldThrowAuctionAlreadyCloseException()
-        {
-            var auctionId = Guid.NewGuid();
-            var auction = CreateActiveAuction();
-            auction.Close();
-
-            SetupAuction(auctionId, auction);
-
-            var act = async () => await _sut.StartAuctionAsync(auctionId);
-
-            await act.Should().ThrowAsync<AuctionAlreadyCloseException>();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using CarAuction.Application.DTOs.Vehicles;
+using CarAuction.Application.DTOs.Vehicles;
 using CarAuction.Application.Exceptions;
 using CarAuction.Application.Services;
 using CarAuction.Application.Services.Interfaces;
@@ -21,8 +21,6 @@ namespace CarAuction.Tests.Application
             _sut = new VehicleService(_vehicleRepositoryMock.Object);
         }
 
-        // ─── Helpers ────────────────────────────────────────────────────────────
-
         private static CreateVehicleRequest ValidSedanRequest(Guid? id = null) => new()
         {
             Id = id,
@@ -41,8 +39,17 @@ namespace CarAuction.Tests.Application
                 .Returns(Task.CompletedTask);
         }
 
-        // ─── AddVehicleAsync ────────────────────────────────────────────────────
+        private void SetupSearch(IEnumerable<Vehicle> vehicles)
+        {
+            _vehicleRepositoryMock
+                .Setup(x => x.SearchAsync(It.IsAny<VehicleSearchCriteria>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(vehicles);
+        }
 
+        /// <summary>
+        /// Verifica que adicionar um Sedan válido persiste no repositório e retorna o DTO com os dados corretos.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task AddVehicleAsync_WithValidSedan_ShouldAddAndReturnDto()
         {
@@ -62,6 +69,10 @@ namespace CarAuction.Tests.Application
                 Times.Once);
         }
 
+        /// <summary>
+        /// Verifica que adicionar um SUV válido persiste no repositório e retorna o tipo correto.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task AddVehicleAsync_WithValidSuv_ShouldAddAndReturnDto()
         {
@@ -85,6 +96,10 @@ namespace CarAuction.Tests.Application
                 Times.Once);
         }
 
+        /// <summary>
+        /// Verifica que adicionar uma Camioneta válida persiste no repositório e retorna o tipo correto.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task AddVehicleAsync_WithValidTruck_ShouldAddAndReturnDto()
         {
@@ -108,6 +123,10 @@ namespace CarAuction.Tests.Application
                 Times.Once);
         }
 
+        /// <summary>
+        /// Verifica que adicionar um Hatchback válido persiste no repositório e retorna o tipo correto.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task AddVehicleAsync_WithValidHatchback_ShouldAddAndReturnDto()
         {
@@ -131,8 +150,10 @@ namespace CarAuction.Tests.Application
                 Times.Once);
         }
 
-        // ─── ID Duplication Validation ───────────────────────────────────────────
-
+        /// <summary>
+        /// Verifica que tentar adicionar um veículo com ID já existente lança DuplicateVehicleException sem persistir.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task AddVehicleAsync_WithExistingId_ShouldThrowDuplicateVehicleException()
         {
@@ -152,6 +173,10 @@ namespace CarAuction.Tests.Application
                 Times.Never);
         }
 
+        /// <summary>
+        /// Verifica que adicionar um veículo com ID externo novo verifica duplicação, persiste e retorna com o ID fornecido.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task AddVehicleAsync_WithNewExternalId_ShouldAdd()
         {
@@ -176,6 +201,10 @@ namespace CarAuction.Tests.Application
                 Times.Once);
         }
 
+        /// <summary>
+        /// Verifica que adicionar um veículo sem ID gera um novo ID sem verificar duplicação no repositório.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task AddVehicleAsync_WithoutId_ShouldGenerateIdWithoutDuplicateCheck()
         {
@@ -194,15 +223,10 @@ namespace CarAuction.Tests.Application
                 Times.Once);
         }
 
-        // ─── SearchVehiclesAsync ─────────────────────────────────────────────────
-
-        private void SetupSearch(IEnumerable<Vehicle> vehicles)
-        {
-            _vehicleRepositoryMock
-                .Setup(x => x.SearchAsync(It.IsAny<VehicleSearchCriteria>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(vehicles);
-        }
-
+        /// <summary>
+        /// Verifica que pesquisar sem filtros retorna todos os veículos do repositório.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task SearchVehiclesAsync_WithNoFilters_ShouldReturnAllVehicles()
         {
@@ -220,6 +244,10 @@ namespace CarAuction.Tests.Application
             result.Should().HaveCount(3);
         }
 
+        /// <summary>
+        /// Verifica que pesquisar sem correspondências retorna uma lista vazia não nula.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task SearchVehiclesAsync_WithNoMatches_ShouldReturnEmptyList()
         {
@@ -232,6 +260,10 @@ namespace CarAuction.Tests.Application
             result.Should().NotBeNull();
         }
 
+        /// <summary>
+        /// Verifica que filtrar por tipo passa os critérios corretos ao repositório e retorna apenas veículos do tipo indicado.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task SearchVehiclesAsync_FilterByType_ShouldPassCriteriaToRepository()
         {
@@ -247,7 +279,6 @@ namespace CarAuction.Tests.Application
             result.Should().HaveCount(2);
             result.Should().AllSatisfy(v => v.Type.Should().Be(VehicleType.Sedan));
 
-            // verifica que os critérios foram passados ao repositório
             _vehicleRepositoryMock.Verify(
                 x => x.SearchAsync(
                     It.Is<VehicleSearchCriteria>(c => c.Type == VehicleType.Sedan),
@@ -255,6 +286,10 @@ namespace CarAuction.Tests.Application
                 Times.Once);
         }
 
+        /// <summary>
+        /// Verifica que filtrar por fabricante passa os critérios corretos ao repositório.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task SearchVehiclesAsync_FilterByManufacturer_ShouldPassCriteriaToRepository()
         {
@@ -276,6 +311,10 @@ namespace CarAuction.Tests.Application
                 Times.Once);
         }
 
+        /// <summary>
+        /// Verifica que filtrar por ano passa os critérios corretos ao repositório.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task SearchVehiclesAsync_FilterByYear_ShouldPassCriteriaToRepository()
         {
@@ -297,8 +336,10 @@ namespace CarAuction.Tests.Application
                 Times.Once);
         }
 
-        // ─── GetByIdAsync ────────────────────────────────────────────────────────
-
+        /// <summary>
+        /// Verifica que obter um veículo existente retorna o DTO com os dados corretos.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task GetByIdAsync_WhenVehicleExists_ShouldReturnDto()
         {
@@ -314,6 +355,10 @@ namespace CarAuction.Tests.Application
             result.Manufacturer.Should().Be("Toyota");
         }
 
+        /// <summary>
+        /// Verifica que obter um veículo inexistente lança VehicleNotFoundException com o ID correto.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task GetByIdAsync_WhenVehicleNotFound_ShouldThrowVehicleNotFoundException()
         {
@@ -329,8 +374,10 @@ namespace CarAuction.Tests.Application
                 .Where(e => e.VehicleId == id);
         }
 
-        // ─── CancellationToken ───────────────────────────────────────────────────
-
+        /// <summary>
+        /// Verifica que cancelar a operação propaga OperationCanceledException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task AddVehicleAsync_WhenCancelled_ShouldPropagateCancellation()
         {
