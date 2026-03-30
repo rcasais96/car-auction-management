@@ -20,10 +20,10 @@ namespace CarAuction.Infrastructure.Migrations
                     Model = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Year = table.Column<int>(type: "int", nullable: false),
                     StartingBid = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false),
-                    LoadCapacity = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    Type = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     NumberOfDoors = table.Column<int>(type: "int", nullable: true),
-                    NumberOfSeats = table.Column<int>(type: "int", nullable: true)
+                    NumberOfSeats = table.Column<int>(type: "int", nullable: true),
+                    LoadCapacity = table.Column<decimal>(type: "decimal(18,2)", nullable: true)
                 },
                 constraints: table =>
                 {

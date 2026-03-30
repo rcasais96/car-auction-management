@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarAuction.Infrastructure.Migrations
 {
     [DbContext(typeof(AuctionDbContext))]
-    [Migration("20260330091001_InitialCreate")]
+    [Migration("20260330100308_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -95,9 +95,6 @@ namespace CarAuction.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal?>("LoadCapacity")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("Manufacturer")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -108,17 +105,13 @@ namespace CarAuction.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("NumberOfDoors")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("NumberOfSeats")
-                        .HasColumnType("int");
-
                     b.Property<decimal>("StartingBid")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<int>("Year")
                         .HasColumnType("int");
@@ -127,7 +120,7 @@ namespace CarAuction.Infrastructure.Migrations
 
                     b.ToTable("Vehicles", (string)null);
 
-                    b.HasDiscriminator<int>("Type");
+                    b.HasDiscriminator<string>("Type");
 
                     b.UseTphMappingStrategy();
                 });
@@ -136,28 +129,42 @@ namespace CarAuction.Infrastructure.Migrations
                 {
                     b.HasBaseType("CarAuction.Domain.Entities.Vehicle");
 
-                    b.HasDiscriminator().HasValue(1);
+                    b.Property<int>("NumberOfDoors")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("int");
+
+                    b.HasDiscriminator().HasValue("Hatchback");
                 });
 
             modelBuilder.Entity("CarAuction.Domain.Entities.Sedan", b =>
                 {
                     b.HasBaseType("CarAuction.Domain.Entities.Vehicle");
 
-                    b.HasDiscriminator().HasValue(0);
+                    b.Property<int>("NumberOfDoors")
+                        .ValueGeneratedOnUpdateSometimes()
+                        .HasColumnType("int");
+
+                    b.HasDiscriminator().HasValue("Sedan");
                 });
 
             modelBuilder.Entity("CarAuction.Domain.Entities.Suv", b =>
                 {
                     b.HasBaseType("CarAuction.Domain.Entities.Vehicle");
 
-                    b.HasDiscriminator().HasValue(2);
+                    b.Property<int>("NumberOfSeats")
+                        .HasColumnType("int");
+
+                    b.HasDiscriminator().HasValue("Suv");
                 });
 
             modelBuilder.Entity("CarAuction.Domain.Entities.Truck", b =>
                 {
                     b.HasBaseType("CarAuction.Domain.Entities.Vehicle");
 
-                    b.HasDiscriminator().HasValue(3);
+                    b.Property<decimal>("LoadCapacity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasDiscriminator().HasValue("Truck");
                 });
 
             modelBuilder.Entity("CarAuction.Domain.Entities.Auction", b =>
