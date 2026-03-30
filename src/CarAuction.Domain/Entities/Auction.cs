@@ -7,20 +7,18 @@ namespace CarAuction.Domain.Entities
 {
     public class Auction
     {
-        public Guid Id { get; }
-        public Guid VehicleId { get; }
-        public decimal StartingBid { get; }
+        public Guid Id { get; init; }
+        public Guid VehicleId { get; init; }
+        public decimal StartingBid { get; init; }
         public DateTime? StartedAt { get; private set; }
         public DateTime? ClosedAt { get; private set; }
         public AuctionStatus Status { get; private set; }
-        public DateTime CreatedAt { get; }
+        public DateTime CreatedAt { get; init; }
         public DateTime UpdatedAt { get; private set; }
         public decimal CurrentHighestBid { get; private set; }
 
         private readonly List<Bid> _bids = new();
         public IReadOnlyCollection<Bid> Bids => _bids.AsReadOnly();
-
-        public IEnumerable<Bid> bids1  => _bids.AsReadOnly();
 
         private Auction() { }
 

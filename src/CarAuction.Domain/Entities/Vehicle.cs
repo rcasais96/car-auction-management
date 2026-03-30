@@ -2,12 +2,14 @@
 {
     public abstract class Vehicle
     {
-        public Guid Id { get; }
-        public string Manufacturer { get; }
-        public string Model { get; }
-        public int Year { get; }
-        public decimal StartingBid { get; }
-        public abstract VehicleType Type { get; }
+        public Guid Id { get; init; }
+        public string Manufacturer { get; init; } = string.Empty;
+        public string Model { get; init; } = string.Empty;
+        public int Year { get; init; }
+        public decimal StartingBid { get; init; }
+        public VehicleType Type { get; protected set; }
+
+        protected Vehicle() { }
 
         protected Vehicle(
             string manufacturer,

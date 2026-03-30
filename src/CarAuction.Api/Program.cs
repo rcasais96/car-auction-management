@@ -18,7 +18,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
-builder.Services.AddInfrastructure();
+builder.Services.AddInfrastructure(builder.Configuration, useInMemory: false);
 builder.Services.AddApplication();
 
 

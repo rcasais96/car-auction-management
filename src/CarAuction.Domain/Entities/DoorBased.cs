@@ -2,7 +2,9 @@
 {
     public abstract class DoorBasedVehicle : Vehicle
     {
-        public int NumberOfDoors { get; }
+        public int NumberOfDoors { get; init; }
+
+        protected DoorBasedVehicle() { }
 
         protected DoorBasedVehicle(
             string manufacturer,

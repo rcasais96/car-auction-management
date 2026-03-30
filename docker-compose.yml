@@ -1,0 +1,14 @@
+﻿services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: car-auction-sqlserver
+    ports:
+      - "1434:1433"  
+    environment:
+      SA_PASSWORD: CarAuctionBCA_123!
+      ACCEPT_EULA: Y
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+volumes:
+  sqlserver_data:

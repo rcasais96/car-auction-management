@@ -6,11 +6,14 @@ namespace CarAuction.Domain.Entities
 {
     public class Bid
     {
-        public Guid Id { get; }
-        public Guid AuctionId { get; }
-        public Guid BidderId { get; }
-        public decimal Amount { get; }
-        public DateTime CreatedAt { get; }
+        public Guid Id { get; init; }
+        public Guid AuctionId { get; init; }
+        public Guid BidderId { get; init; }
+        public decimal Amount { get; init; }
+        public DateTime CreatedAt { get; init; }
+
+        private Bid() { }
+
 
         public Bid(Guid auctionId, Guid bidderId, decimal amount)
         {

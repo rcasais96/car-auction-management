@@ -2,13 +2,15 @@
 {
     public class Sedan : DoorBasedVehicle
     {
-        public override VehicleType Type => VehicleType.Sedan;
+
+        private Sedan() { }
+
 
         public Sedan(string manufacturer, string model, int year, decimal startingBid, int numberOfDoors, Guid? id = null) 
             : base(manufacturer, model, year, startingBid, numberOfDoors,id)
         {
-         
 
+            Type = VehicleType.Sedan;
         }
     }
 }
