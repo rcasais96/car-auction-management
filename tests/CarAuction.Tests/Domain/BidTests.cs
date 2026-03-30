@@ -1,8 +1,12 @@
-﻿using CarAuction.Domain.Entities;
+using CarAuction.Domain.Entities;
 using FluentAssertions;
 
 public class BidTests
 {
+    /// <summary>
+    /// Verifica que o construtor cria um lance com os dados corretos e define o CreatedAt.
+    /// </summary>
+    /// <returns></returns>
     [Fact]
     public void Constructor_WithValidData_ShouldCreateBid()
     {
@@ -13,6 +17,10 @@ public class BidTests
         bid.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }
 
+    /// <summary>
+    /// Verifica que o construtor lança ArgumentOutOfRangeException quando o valor do lance é zero ou negativo.
+    /// </summary>
+    /// <returns></returns>
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
@@ -22,6 +30,10 @@ public class BidTests
         act.Should().Throw<ArgumentOutOfRangeException>();
     }
 
+    /// <summary>
+    /// Verifica que o construtor lança ArgumentException quando o BidderId está vazio.
+    /// </summary>
+    /// <returns></returns>
     [Fact]
     public void Constructor_WithEmptyBidderId_ShouldThrowArgumentException()
     {
@@ -30,6 +42,10 @@ public class BidTests
             .WithMessage("*bidderId*");
     }
 
+    /// <summary>
+    /// Verifica que o construtor lança ArgumentException quando o AuctionId está vazio.
+    /// </summary>
+    /// <returns></returns>
     [Fact]
     public void Constructor_WithEmptyAuctionId_ShouldThrowArgumentException()
     {

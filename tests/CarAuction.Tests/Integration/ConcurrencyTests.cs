@@ -1,4 +1,4 @@
-﻿using CarAuction.Application.DTOs.Auctions;
+using CarAuction.Application.DTOs.Auctions;
 using CarAuction.Application.DTOs.Vehicles;
 using CarAuction.Application.Exceptions;
 using CarAuction.Application.Services;
@@ -27,7 +27,10 @@ namespace CarAuction.Tests.Integration
             _auctionService = new AuctionService(_auctionRepo, _vehicleRepo);
         }
 
-        // testa que dois leilões não são criados simultaneamente para o mesmo veículo quando já está num leilão ativo
+        /// <summary>
+        /// Verifica que tentativas concorrentes de criar leilões para um veículo já em leilão ativo falham todas com VehicleAlreadyInActiveAuctionException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task CreateAuction_Concurrent_ShouldOnlyCreateOne()
         {
@@ -41,13 +44,11 @@ namespace CarAuction.Tests.Integration
                 NumberOfDoors = 4
             });
 
-            //  inicia o leilão primeiro — só aí é Active
             var firstAuction = await _auctionService.CreateAuctionAsync(
                 new CreateAuctionRequest { VehicleId = vehicle.Id });
 
             await _auctionService.StartAuctionAsync(firstAuction.Id);
 
-            // agora tenta criar 10 leilões simultâneos — veículo já tem Active
             var exceptions = new ConcurrentBag<Exception>();
             var results = new ConcurrentBag<AuctionDTO>();
 
@@ -67,18 +68,19 @@ namespace CarAuction.Tests.Integration
                     }
                 });
 
-            // Assert — nenhum leilão criado — todos falharam
             results.Should().BeEmpty();
             exceptions.Should().HaveCount(10);
             exceptions.Should().AllSatisfy(e =>
                 e.Should().BeOfType<VehicleAlreadyInActiveAuctionException>());
         }
 
-        // testa que bids concorrentes não corrompem o estado
+        /// <summary>
+        /// Verifica que lances concorrentes não corrompem o estado do leilão e o lance mais alto é mantido corretamente.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task PlaceBid_Concurrent_ShouldMaintainCorrectHighestBid()
         {
-            // Arrange
             var vehicle = await _vehicleService.AddVehicleAsync(new CreateVehicleRequest
             {
                 Type = VehicleType.Sedan,
@@ -96,10 +98,9 @@ namespace CarAuction.Tests.Integration
 
             var successfulBids = new ConcurrentBag<decimal>();
             var amounts = Enumerable.Range(1, 20)
-                .Select(i => 1000m + (i * 100m)) // 1100, 1200, ..., 3000
+                .Select(i => 1000m + (i * 100m))
                 .ToList();
 
-            // Act — 20 threads tentam fazer bid simultaneamente
             await Parallel.ForEachAsync(
                 amounts,
                 async (amount, ct) =>
@@ -116,18 +117,14 @@ namespace CarAuction.Tests.Integration
                     }
                     catch (InvalidBidException)
                     {
-                        // esperado — bid mais baixo rejeitado
                     }
                 });
 
-            // Assert — estado não corrompido
             var finalAuction = await _auctionService.GetByIdAsync(auction.Id);
 
-            // CurrentHighestBid deve ser o valor mais alto dos bids aceites
             finalAuction.CurrentHighestBid.Should().Be(
                 successfulBids.Any() ? successfulBids.Max() : 1000m);
 
-            // todos os bids no histórico são válidos — cada um maior que o anterior
             var bidList = finalAuction.Bids.OrderBy(b => b.Amount).ToList();
             for (int i = 1; i < bidList.Count; i++)
             {
@@ -135,11 +132,13 @@ namespace CarAuction.Tests.Integration
             }
         }
 
-        // testa que veículos com Id externo não são duplicados sob concorrência
+        /// <summary>
+        /// Verifica que tentativas concorrentes de adicionar um veículo com o mesmo ID externo resultam em apenas uma adição, rejeitando as restantes com DuplicateVehicleException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task AddVehicle_ConcurrentWithSameExternalId_ShouldOnlyAddOne()
         {
-            // Arrange
             var externalId = Guid.NewGuid();
             var request = new CreateVehicleRequest
             {
@@ -155,7 +154,6 @@ namespace CarAuction.Tests.Integration
             var exceptions = new ConcurrentBag<Exception>();
             var results = new ConcurrentBag<VehicleDTO>();
 
-            // Act — 10 threads tentam adicionar o mesmo veículo
             await Parallel.ForEachAsync(
                 Enumerable.Range(0, 10),
                 async (_, ct) =>
@@ -171,7 +169,6 @@ namespace CarAuction.Tests.Integration
                     }
                 });
 
-            // Assert
             results.Should().HaveCount(1);
             exceptions.Should().HaveCount(9);
             exceptions.Should().AllSatisfy(e =>

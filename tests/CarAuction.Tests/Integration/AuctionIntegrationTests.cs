@@ -1,4 +1,4 @@
-﻿using CarAuction.Application.DTOs.Auctions;
+using CarAuction.Application.DTOs.Auctions;
 using CarAuction.Application.DTOs.Vehicles;
 using CarAuction.Application.Exceptions;
 using CarAuction.Application.Services;
@@ -34,29 +34,25 @@ namespace CarAuction.Tests.Integration
                 NumberOfDoors = 4
             });
 
-        // ─── Fluxo completo ──────────────────────────────────────────────────────
-
-        // testa o fluxo completo descrito no enunciado
-        // add vehicle → create auction → start → bid → close
+        /// <summary>
+        /// Verifica o fluxo completo de um leilão: adicionar veículo, criar leilão, iniciar, colocar lances e fechar.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task FullAuctionFlow_ShouldWorkCorrectly()
         {
-            // 1. adicionar veículo
             var vehicle = await AddDefaultVehicleAsync();
             vehicle.Id.Should().NotBe(Guid.Empty);
 
-            // 2. criar leilão
             var auction = await _auctionService.CreateAuctionAsync(
                 new CreateAuctionRequest { VehicleId = vehicle.Id });
 
             auction.Status.Should().Be(AuctionStatus.Scheduled);
             auction.VehicleId.Should().Be(vehicle.Id);
 
-            // 3. iniciar leilão
             var started = await _auctionService.StartAuctionAsync(auction.Id);
             started.Status.Should().Be(AuctionStatus.Active);
 
-            // 4. colocar bids
             var bid1 = await _auctionService.PlaceBidAsync(auction.Id,
                 new PlaceBidRequest { BidderId = Guid.NewGuid(), Amount = 30000m });
 
@@ -66,7 +62,6 @@ namespace CarAuction.Tests.Integration
             bid1.Amount.Should().Be(30000m);
             bid2.Amount.Should().Be(35000m);
 
-            // 5. fechar leilão
             await _auctionService.CloseAuctionAsync(auction.Id);
 
             var closed = await _auctionService.GetByIdAsync(auction.Id);
@@ -75,8 +70,10 @@ namespace CarAuction.Tests.Integration
             closed.Bids.Should().HaveCount(2);
         }
 
-        // ─── Enunciado 4a — duplicado ────────────────────────────────────────────
-
+        /// <summary>
+        /// Verifica que adicionar um veículo com ID externo duplicado lança DuplicateVehicleException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task AddVehicle_WithDuplicateExternalId_ShouldThrowDuplicateVehicleException()
         {
@@ -108,8 +105,10 @@ namespace CarAuction.Tests.Integration
                 .Where(e => e.VehicleId == externalId);
         }
 
-        // ─── Enunciado 4b — validação de veículo e leilão ───────────────────────
-
+        /// <summary>
+        /// Verifica que criar um leilão para um veículo inexistente lança VehicleNotFoundException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task CreateAuction_WithNonExistentVehicle_ShouldThrowVehicleNotFoundException()
         {
@@ -119,6 +118,10 @@ namespace CarAuction.Tests.Integration
             await act.Should().ThrowAsync<VehicleNotFoundException>();
         }
 
+        /// <summary>
+        /// Verifica que criar um segundo leilão para um veículo com leilão ativo lança VehicleAlreadyInActiveAuctionException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task CreateAuction_WhenVehicleAlreadyInActiveAuction_ShouldThrow()
         {
@@ -135,6 +138,10 @@ namespace CarAuction.Tests.Integration
             await act.Should().ThrowAsync<VehicleAlreadyInActiveAuctionException>();
         }
 
+        /// <summary>
+        /// Verifica que é possível criar um novo leilão após o leilão anterior do mesmo veículo ser encerrado.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task CreateAuction_AfterPreviousAuctionClosed_ShouldAllowNewAuction()
         {
@@ -153,8 +160,10 @@ namespace CarAuction.Tests.Integration
             auction2.Status.Should().Be(AuctionStatus.Scheduled);
         }
 
-        // ─── Enunciado 4c — validação de bid ─────────────────────────────────────
-
+        /// <summary>
+        /// Verifica que dar um lance num leilão não iniciado lança AuctionNotActiveException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task PlaceBid_WhenAuctionNotStarted_ShouldThrowAuctionNotActiveException()
         {
@@ -169,6 +178,10 @@ namespace CarAuction.Tests.Integration
             await act.Should().ThrowAsync<AuctionNotActiveException>();
         }
 
+        /// <summary>
+        /// Verifica que dar um lance inferior ao lance atual lança InvalidBidException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task PlaceBid_WithLowerAmount_ShouldThrowInvalidBidException()
         {
@@ -188,8 +201,10 @@ namespace CarAuction.Tests.Integration
             await act.Should().ThrowAsync<InvalidBidException>();
         }
 
-        // ─── Enunciado 2 — pesquisa ──────────────────────────────────────────────
-
+        /// <summary>
+        /// Verifica que pesquisar veículos por tipo retorna apenas os veículos do tipo especificado.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task SearchVehicles_ByType_ShouldReturnCorrectResults()
         {
