@@ -1,13 +1,10 @@
-﻿using CarAuction.Domain.Entities;
+﻿using CarAuction.Application.Services.Interfaces;
+using CarAuction.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Reflection.Emit;
-using System.Text;
 
 namespace CarAuction.Infrastructure.Database
 {
-    public class AuctionDbContext : DbContext
+    public class AuctionDbContext : DbContext, IUnitOfWork
     {
         public AuctionDbContext(DbContextOptions<AuctionDbContext> options)
             : base(options) { }

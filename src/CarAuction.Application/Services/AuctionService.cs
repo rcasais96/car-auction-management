@@ -13,10 +13,10 @@ namespace CarAuction.Application.Services
     {
         private readonly IAuctionRepository _auctionRepository;
         private readonly IVehicleRepository _vehicleRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
         private static readonly ConcurrentDictionary<Guid, SemaphoreSlim> _auctionLocks = new();
         private static readonly ConcurrentDictionary<Guid, SemaphoreSlim> _vehiclesLocks = new();
-
 
         private static SemaphoreSlim GetAuctionLock(Guid auctionId)
         => _auctionLocks.GetOrAdd(auctionId, _ => new SemaphoreSlim(1, 1));
@@ -26,10 +26,12 @@ namespace CarAuction.Application.Services
 
         public AuctionService(
             IAuctionRepository auctionRepository,
-            IVehicleRepository vehicleRepository)
+            IVehicleRepository vehicleRepository,
+            IUnitOfWork unitOfWork)
         {
             _auctionRepository = auctionRepository;
             _vehicleRepository = vehicleRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<AuctionDTO> GetByIdAsync(Guid auctionId, CancellationToken cancellationToken = default)
@@ -55,6 +57,7 @@ namespace CarAuction.Application.Services
 
                 var auction = new Auction(vehicle.Id, vehicle.StartingBid);
                 await _auctionRepository.AddAsync(auction, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken); 
 
                 return Mapper.MapToResponse(auction);
             }
@@ -70,6 +73,7 @@ namespace CarAuction.Application.Services
                 ?? throw new AuctionNotFoundException(auctionId);
 
             auction.Start();
+            await _unitOfWork.SaveChangesAsync(cancellationToken); 
 
             return Mapper.MapToResponse(auction);
         }
@@ -84,6 +88,8 @@ namespace CarAuction.Application.Services
                  ?? throw new AuctionNotFoundException(auctionId);
 
                 auction.PlaceBid(model.BidderId, model.Amount);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+
                 return Mapper.MapToResponse(auction.Bids.Last());
             }
             finally
@@ -99,6 +105,8 @@ namespace CarAuction.Application.Services
                 ?? throw new AuctionNotFoundException(auctionId);
 
             auction.Close();
+            await _unitOfWork.SaveChangesAsync(cancellationToken); 
+
         }
     }
 }

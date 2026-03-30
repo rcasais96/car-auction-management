@@ -11,11 +11,15 @@ namespace CarAuction.Application.Services
     public class VehicleService : IVehicleService
     {
         private readonly IVehicleRepository _vehicleRepository;
+        private readonly IUnitOfWork _unitOfWork;
+
         private static readonly ConcurrentDictionary<Guid, SemaphoreSlim> _vehicleLocks = new();
 
-        public VehicleService(IVehicleRepository vehicleRepository)
+        public VehicleService(IVehicleRepository vehicleRepository, IUnitOfWork unitOfWork)
         {
             _vehicleRepository = vehicleRepository;
+            _unitOfWork = unitOfWork;
+
         }
 
         public async Task<VehicleDTO> GetByIdAsync(Guid vehicleId, CancellationToken cancellationToken = default)
@@ -41,6 +45,8 @@ namespace CarAuction.Application.Services
 
                     var vehicle = VehicleFactory.Create(request);
                     await _vehicleRepository.AddAsync(vehicle, cancellationToken);
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+
 
                     return Mapper.MapToResponse(vehicle);
                 }
@@ -54,6 +60,7 @@ namespace CarAuction.Application.Services
  
                 var vehicle = VehicleFactory.Create(request);
                 await _vehicleRepository.AddAsync(vehicle, cancellationToken);
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
 
                 return Mapper.MapToResponse(vehicle);
             }

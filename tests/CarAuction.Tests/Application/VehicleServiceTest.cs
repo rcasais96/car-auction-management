@@ -13,12 +13,19 @@ namespace CarAuction.Tests.Application
     public class VehicleServiceTests
     {
         private readonly Mock<IVehicleRepository> _vehicleRepositoryMock;
+        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly IVehicleService _sut;
 
         public VehicleServiceTests()
         {
             _vehicleRepositoryMock = new Mock<IVehicleRepository>();
-            _sut = new VehicleService(_vehicleRepositoryMock.Object);
+            _unitOfWorkMock = new Mock<IUnitOfWork>();
+
+            _unitOfWorkMock
+           .Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
+           .ReturnsAsync(0);
+
+            _sut = new VehicleService(_vehicleRepositoryMock.Object, _unitOfWorkMock.Object);
         }
 
         // ─── Helpers ────────────────────────────────────────────────────────────

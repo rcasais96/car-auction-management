@@ -5,6 +5,7 @@ using CarAuction.Application.Services;
 using CarAuction.Application.Services.Interfaces;
 using CarAuction.Domain.Entities;
 using CarAuction.Domain.Exceptions;
+using CarAuction.Infrastructure.Database;
 using CarAuction.Infrastructure.Repositories.InMemory;
 using FluentAssertions;
 using System;
@@ -23,8 +24,8 @@ namespace CarAuction.Tests.Integration
 
         public ConcurrencyTests()
         {
-            _vehicleService = new VehicleService(_vehicleRepo);
-            _auctionService = new AuctionService(_auctionRepo, _vehicleRepo);
+            _vehicleService = new VehicleService(_vehicleRepo, new InMemoryUnitOfWork());
+            _auctionService = new AuctionService(_auctionRepo, _vehicleRepo, new InMemoryUnitOfWork());
         }
 
         // testa que dois leilões não são criados simultaneamente para o mesmo veículo quando já está num leilão ativo

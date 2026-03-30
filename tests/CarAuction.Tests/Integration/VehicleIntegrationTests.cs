@@ -5,6 +5,7 @@ using CarAuction.Application.Exceptions;
 using CarAuction.Application.Services;
 using CarAuction.Application.Services.Interfaces;
 using CarAuction.Domain.Entities;
+using CarAuction.Infrastructure.Database;
 using CarAuction.Infrastructure.Repositories.InMemory;
 using FluentAssertions;
 
@@ -17,7 +18,7 @@ namespace CarAuction.Tests.Integration
 
         public VehicleIntegrationTests()
         {
-            _vehicleService = new VehicleService(_vehicleRepo);
+            _vehicleService = new VehicleService(_vehicleRepo, new InMemoryUnitOfWork());
         }
 
         private static CreateVehicleRequest DefaultSedanRequest(Guid? id = null) => new()

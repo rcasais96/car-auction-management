@@ -1,4 +1,5 @@
-﻿using CarAuction.Domain.Repositories;
+﻿using CarAuction.Application.Services.Interfaces;
+using CarAuction.Domain.Repositories;
 using CarAuction.Infrastructure.Database;
 using CarAuction.Infrastructure.Repositories.Database;
 using CarAuction.Infrastructure.Repositories.InMemory;
@@ -22,6 +23,8 @@ namespace CarAuction.Infrastructure.Extensions
             {
                 services.AddSingleton<IVehicleRepository, InMemoryVehicleRepository>();
                 services.AddSingleton<IAuctionRepository, InMemoryAuctionRepository>();
+                services.AddSingleton<IUnitOfWork, InMemoryUnitOfWork>(); 
+
             }
             else
             {
@@ -31,6 +34,9 @@ namespace CarAuction.Infrastructure.Extensions
 
                 services.AddScoped<IVehicleRepository, VehicleRepository>();
                 services.AddScoped<IAuctionRepository, AuctionRepository>();
+
+                services.AddScoped<IUnitOfWork>(sp => 
+                         sp.GetRequiredService<AuctionDbContext>());
             }
 
             return services;

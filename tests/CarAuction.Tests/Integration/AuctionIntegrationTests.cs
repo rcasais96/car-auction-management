@@ -5,8 +5,10 @@ using CarAuction.Application.Services;
 using CarAuction.Application.Services.Interfaces;
 using CarAuction.Domain.Entities;
 using CarAuction.Domain.Exceptions;
+using CarAuction.Infrastructure.Database;
 using CarAuction.Infrastructure.Repositories.InMemory;
 using FluentAssertions;
+using Moq;
 
 namespace CarAuction.Tests.Integration
 {
@@ -14,13 +16,14 @@ namespace CarAuction.Tests.Integration
     {
         private readonly InMemoryVehicleRepository _vehicleRepo = new();
         private readonly InMemoryAuctionRepository _auctionRepo = new();
+
         private readonly IVehicleService _vehicleService;
         private readonly IAuctionService _auctionService;
 
         public AuctionIntegrationTests()
         {
-            _vehicleService = new VehicleService(_vehicleRepo);
-            _auctionService = new AuctionService(_auctionRepo, _vehicleRepo);
+            _vehicleService = new VehicleService(_vehicleRepo, new InMemoryUnitOfWork());
+            _auctionService = new AuctionService(_auctionRepo, _vehicleRepo, new InMemoryUnitOfWork());
         }
 
         private async Task<VehicleDTO> AddDefaultVehicleAsync()

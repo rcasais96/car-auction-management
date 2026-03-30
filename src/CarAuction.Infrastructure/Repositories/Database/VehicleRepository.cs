@@ -28,7 +28,6 @@ namespace CarAuction.Infrastructure.Repositories.Database
         public async Task AddAsync(Vehicle vehicle, CancellationToken ct = default)
         {
             await _context.Vehicles.AddAsync(vehicle, ct);
-            await _context.SaveChangesAsync(ct);
         }
 
         public async Task<IEnumerable<Vehicle>> SearchAsync(

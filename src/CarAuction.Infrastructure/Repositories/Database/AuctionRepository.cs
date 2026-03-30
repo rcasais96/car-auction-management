@@ -26,7 +26,6 @@ namespace CarAuction.Infrastructure.Repositories.Database
         public async Task AddAsync(Auction auction, CancellationToken ct = default)
         {
             await _context.Auctions.AddAsync(auction, ct);
-            await _context.SaveChangesAsync(ct);
         }
 
         public async Task<bool> HasActiveAuctionAsync(Guid vehicleId, CancellationToken ct = default)
