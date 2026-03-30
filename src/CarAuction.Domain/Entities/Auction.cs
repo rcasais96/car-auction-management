@@ -20,8 +20,6 @@ namespace CarAuction.Domain.Entities
         private readonly List<Bid> _bids = new();
         public IReadOnlyCollection<Bid> Bids => _bids.AsReadOnly();
 
-        public IEnumerable<Bid> bids1  => _bids.AsReadOnly();
-
         private Auction() { }
 
         public Auction(Guid vehicleId, decimal startingBid)
