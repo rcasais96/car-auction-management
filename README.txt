@@ -1,4 +1,5 @@
 ﻿Overview
+
 REST API built with .NET to manage car auctions. Supports four vehicle types (Sedan, Hatchback, SUV, Truck) with full auction lifecycle management — create, start, bid, and close.
 
 How to Run
@@ -21,6 +22,7 @@ tests/
     ├── Application/            # Unit tests — Services with Moq
     └── Integration/            # Integration and concurrency tests
 
+*AI tools were used to assist with test generation*
 
 Design Decisions
 •Clean Architecture — strict dependency rule, domain has no external dependencies. Business logic is framework-agnostic and easy to test in isolation.
