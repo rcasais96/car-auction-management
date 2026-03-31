@@ -1,5 +1,3 @@
-﻿
-
 using CarAuction.Application.DTOs.Vehicles;
 using CarAuction.Application.Exceptions;
 using CarAuction.Application.Services;
@@ -40,7 +38,10 @@ namespace CarAuction.Tests.Integration
             NumberOfDoors = 4
         };
 
-
+        /// <summary>
+        /// Verifica que adicionar um veículo sem ID externo gera automaticamente um ID válido.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task AddVehicle_WithoutExternalId_ShouldGenerateId()
         {
@@ -51,6 +52,10 @@ namespace CarAuction.Tests.Integration
             result.Type.Should().Be(VehicleType.Sedan);
         }
 
+        /// <summary>
+        /// Verifica que adicionar um veículo com ID externo preserva o ID fornecido.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task AddVehicle_WithExternalId_ShouldUseProvidedId()
         {
@@ -62,7 +67,10 @@ namespace CarAuction.Tests.Integration
             result.Id.Should().Be(externalId);
         }
 
-
+        /// <summary>
+        /// Verifica que adicionar um veículo com ID externo duplicado lança DuplicateVehicleException com o ID correto.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task AddVehicle_WithDuplicateExternalId_ShouldThrowDuplicateVehicleException()
         {
@@ -77,6 +85,10 @@ namespace CarAuction.Tests.Integration
                 .Where(e => e.VehicleId == externalId);
         }
 
+        /// <summary>
+        /// Verifica que adicionar múltiplos veículos sem ID externo gera IDs únicos sem colisões.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task AddVehicle_WithoutExternalId_ShouldNeverThrowDuplicate()
         {
@@ -86,7 +98,10 @@ namespace CarAuction.Tests.Integration
             vehicle1.Id.Should().NotBe(vehicle2.Id);
         }
 
-
+        /// <summary>
+        /// Verifica que pesquisar por tipo retorna apenas os veículos do tipo indicado.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task Search_ByType_ShouldReturnOnlyMatchingType()
         {
@@ -108,6 +123,10 @@ namespace CarAuction.Tests.Integration
             result.First().Type.Should().Be(VehicleType.Sedan);
         }
 
+        /// <summary>
+        /// Verifica que pesquisar por fabricante retorna apenas os veículos do fabricante indicado.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task Search_ByManufacturer_ShouldReturnOnlyMatchingManufacturer()
         {
@@ -129,6 +148,10 @@ namespace CarAuction.Tests.Integration
             result.First().Manufacturer.Should().Be("BMW");
         }
 
+        /// <summary>
+        /// Verifica que pesquisar por modelo retorna apenas os veículos com o modelo indicado.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task Search_ByModel_ShouldReturnOnlyMatchingModel()
         {
@@ -150,6 +173,10 @@ namespace CarAuction.Tests.Integration
             result.First().Model.Should().Be("Series 3");
         }
 
+        /// <summary>
+        /// Verifica que pesquisar por ano retorna apenas os veículos do ano indicado.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task Search_ByYear_ShouldReturnOnlyMatchingYear()
         {
@@ -171,6 +198,10 @@ namespace CarAuction.Tests.Integration
             result.First().Year.Should().Be(2020);
         }
 
+        /// <summary>
+        /// Verifica que pesquisar sem correspondências retorna uma lista vazia não nula.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task Search_WithNoMatches_ShouldReturnEmptyList()
         {
@@ -183,8 +214,10 @@ namespace CarAuction.Tests.Integration
             result.Should().NotBeNull();
         }
 
-
-
+        /// <summary>
+        /// Verifica que obter um veículo existente pelo ID retorna os dados corretos.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task GetById_WhenExists_ShouldReturnVehicle()
         {
@@ -196,6 +229,10 @@ namespace CarAuction.Tests.Integration
             result.Manufacturer.Should().Be("BMW");
         }
 
+        /// <summary>
+        /// Verifica que obter um veículo inexistente pelo ID lança VehicleNotFoundException.
+        /// </summary>
+        /// <returns></returns>
         [Fact]
         public async Task GetById_WhenNotFound_ShouldThrowVehicleNotFoundException()
         {
