@@ -21,6 +21,7 @@ namespace CarAuction.Infrastructure.Repositories.Database
         public async Task<Auction?> GetByIdAsync(Guid id, CancellationToken ct = default)
             => await _context.Auctions
                 .Include(a => a.Bids)
+                .Include(a => a.Vehicle)
                 .FirstOrDefaultAsync(a => a.Id == id, ct);
 
         public async Task AddAsync(Auction auction, CancellationToken ct = default)

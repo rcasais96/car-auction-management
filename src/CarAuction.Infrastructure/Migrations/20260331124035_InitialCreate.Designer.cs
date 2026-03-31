@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarAuction.Infrastructure.Migrations
 {
     [DbContext(typeof(AuctionDbContext))]
-    [Migration("20260330100308_InitialCreate")]
+    [Migration("20260331124035_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -28,7 +28,6 @@ namespace CarAuction.Infrastructure.Migrations
             modelBuilder.Entity("CarAuction.Domain.Entities.Auction", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("ClosedAt")
@@ -67,7 +66,6 @@ namespace CarAuction.Infrastructure.Migrations
             modelBuilder.Entity("CarAuction.Domain.Entities.Bid", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Amount")
@@ -92,7 +90,6 @@ namespace CarAuction.Infrastructure.Migrations
             modelBuilder.Entity("CarAuction.Domain.Entities.Vehicle", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Manufacturer")

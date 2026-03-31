@@ -26,7 +26,7 @@ namespace CarAuction.Domain.Entities
             if(auctionId == Guid.Empty)
                 throw new ArgumentException("Auction ID is required", nameof(auctionId));
 
-            Id = Guid.NewGuid();
+            Id = Guid.CreateVersion7();
             AuctionId = auctionId;
             BidderId = bidderId;
             Amount = amount;

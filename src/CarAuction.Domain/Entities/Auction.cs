@@ -19,6 +19,7 @@ namespace CarAuction.Domain.Entities
 
         private readonly List<Bid> _bids = new();
         public IReadOnlyCollection<Bid> Bids => _bids.AsReadOnly();
+        public Vehicle? Vehicle { get; private set; } 
 
         private Auction() { }
 
@@ -31,7 +32,7 @@ namespace CarAuction.Domain.Entities
                 throw new ArgumentOutOfRangeException(nameof(startingBid),
                     "Starting bid must be greater than zero");
 
-            Id = Guid.NewGuid();
+            Id = Guid.CreateVersion7();
             VehicleId = vehicleId;
             StartingBid = startingBid;
             CurrentHighestBid = startingBid;

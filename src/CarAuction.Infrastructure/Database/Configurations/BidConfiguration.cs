@@ -13,6 +13,7 @@ namespace CarAuction.Infrastructure.Database.Configurations
         {
             builder.ToTable("Bids");
             builder.HasKey(b => b.Id);
+            builder.Property(v => v.Id).ValueGeneratedNever();
 
             builder.Property(b => b.AuctionId);
 

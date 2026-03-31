@@ -23,7 +23,8 @@ namespace CarAuction.Application.Utils
                 BidderId = b.BidderId,
                 Amount = b.Amount,
                 CreatedAt = b.CreatedAt
-            })
+            }),
+            Vehicle = auction.Vehicle == null ? null : MapToResponse(auction.Vehicle)
         };
 
         public static BidDTO MapToResponse(Bid bid) => new()

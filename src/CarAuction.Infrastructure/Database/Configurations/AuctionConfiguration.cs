@@ -13,6 +13,7 @@ namespace CarAuction.Infrastructure.Database.Configurations
         {
             builder.ToTable("Auctions");
             builder.HasKey(a => a.Id);
+            builder.Property(a => a.Id).ValueGeneratedNever();
 
             builder.Property(a => a.StartingBid)
                 .HasColumnType("decimal(18,2)");
@@ -24,12 +25,11 @@ namespace CarAuction.Infrastructure.Database.Configurations
                 .HasConversion<string>()
                 .HasMaxLength(20);
 
-            builder.HasOne<Vehicle>()
+            builder.HasOne(a => a.Vehicle)
                 .WithMany()
                 .HasForeignKey(a => a.VehicleId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // ← liga o Navigation ao HasMany para evitar shadow property
             builder.HasMany(a => a.Bids)
                 .WithOne()
                 .HasForeignKey(b => b.AuctionId)

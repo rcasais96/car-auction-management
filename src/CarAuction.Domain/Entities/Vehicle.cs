@@ -30,7 +30,8 @@
             if (startingBid <= 0)
                 throw new ArgumentOutOfRangeException(nameof(startingBid), "Starting bid must be greater than zero");
 
-            Id = id.HasValue && id.Value != Guid.Empty ? id.Value : Guid.NewGuid();
+            Id = id.HasValue && id.Value != Guid.Empty ? id.Value : Id = Guid.CreateVersion7();
+            ;
             Manufacturer = manufacturer;
             Model = model;
             Year = year;

@@ -14,6 +14,7 @@ namespace CarAuction.Infrastructure.Database.Configurations
         {
             builder.ToTable("Vehicles");
             builder.HasKey(v => v.Id);
+            builder.Property(v => v.Id).ValueGeneratedNever();
 
             builder.Property(v => v.Manufacturer)
                 .IsRequired()

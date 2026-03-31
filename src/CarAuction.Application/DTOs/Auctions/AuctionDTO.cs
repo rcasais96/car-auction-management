@@ -1,4 +1,5 @@
-﻿using CarAuction.Domain.Entities;
+﻿using CarAuction.Application.DTOs.Vehicles;
+using CarAuction.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -16,5 +17,6 @@ namespace CarAuction.Application.DTOs.Auctions
         public DateTime? ClosedAt { get; init; }
         public DateTime CreatedAt { get; init; }
         public IEnumerable<BidDTO> Bids { get; init; } = Enumerable.Empty<BidDTO>();
-    }
+        public VehicleDTO Vehicle { get; init; }
+}
 }
